@@ -1,19 +1,15 @@
+use aoc_runner_derive::{aoc, aoc_generator};
 use cached::proc_macro::cached;
 
-const INPUT: &str = include_str!("../input.txt");
-
-fn main() {
-    println!("part_1: {}", part_1(INPUT));
-    println!("part_2: {}", part_2(INPUT));
-}
-
-fn parse_ages(input: &str) -> impl Iterator<Item = usize> + '_ {
+#[aoc_generator(day6)]
+fn parse_ages(input: &str) -> Vec<usize> {
     input
         .lines()
         .next()
         .unwrap()
         .split(",")
         .map(|x| usize::from_str_radix(x, 10).unwrap())
+        .collect()
 }
 
 #[cached]
@@ -31,16 +27,14 @@ fn fish_after(timer: usize, days: usize) -> usize {
     fish_after(timer - 1, days)
 }
 
-pub fn part_1(input: &str) -> usize {
-    let ages = parse_ages(input);
-
-    ages.map(|fish| fish_after(fish, 80)).sum()
+#[aoc(day6, part1)]
+pub fn part_1(ages: &[usize]) -> usize {
+    ages.iter().map(|&fish| fish_after(fish, 80)).sum()
 }
 
-pub fn part_2(input: &str) -> usize {
-    let ages = parse_ages(input);
-
-    ages.map(|fish| fish_after(fish, 256)).sum()
+#[aoc(day6, part2)]
+pub fn part_2(ages: &[usize]) -> usize {
+    ages.iter().map(|&fish| fish_after(fish, 256)).sum()
 }
 
 #[cfg(test)]
@@ -59,11 +53,11 @@ mod tests {
 
     #[test]
     fn test_part_1() {
-        assert_eq!(part_1(EXAMPLE), 5934);
+        assert_eq!(part_1(&parse_ages(EXAMPLE)), 5934);
     }
 
     #[test]
     fn test_part_2() {
-        assert_eq!(part_2(EXAMPLE), 26984457539);
+        assert_eq!(part_2(&parse_ages(EXAMPLE)), 26984457539);
     }
 }

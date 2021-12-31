@@ -1,11 +1,10 @@
+use aoc_runner_derive::{aoc, aoc_generator};
 use std::collections::HashMap;
-
-const INPUT: &str = include_str!("../input.txt");
 
 type Point = (usize, usize);
 
 #[derive(Debug, PartialEq, Eq)]
-struct Line {
+pub struct Line {
     start: Point,
     end: Point,
 }
@@ -74,15 +73,11 @@ fn create_range(start: usize, end: usize) -> impl Iterator<Item = usize> {
     part1.chain(part2.rev())
 }
 
-fn main() {
-    println!("part_1: {}", part_1(INPUT));
-    println!("part_2: {}", part_2(INPUT));
-}
-
 fn to_usize(x: &str) -> usize {
     usize::from_str_radix(x, 10).unwrap()
 }
 
+#[aoc_generator(day5)]
 fn parse_lines(input: &str) -> Lines {
     input
         .lines()
@@ -98,8 +93,8 @@ fn parse_lines(input: &str) -> Lines {
         .collect()
 }
 
-pub fn part_1(input: &str) -> usize {
-    let lines = parse_lines(input);
+#[aoc(day5, part1)]
+pub fn part_1(lines: &Lines) -> usize {
     let mut counters: HashMap<Point, usize> = HashMap::new();
 
     for line in lines.iter().filter(|l| l.is_horizontal() | l.is_vertical()) {
@@ -111,8 +106,8 @@ pub fn part_1(input: &str) -> usize {
     counters.values().filter(|&x| x >= &2).count()
 }
 
-pub fn part_2(input: &str) -> usize {
-    let lines = parse_lines(input);
+#[aoc(day5, part2)]
+pub fn part_2(lines: &Lines) -> usize {
     let mut counters: HashMap<Point, usize> = HashMap::new();
 
     for line in lines {
@@ -186,11 +181,11 @@ mod tests {
 
     #[test]
     fn test_part_1() {
-        assert_eq!(part_1(EXAMPLE), 5);
+        assert_eq!(part_1(&parse_lines(EXAMPLE)), 5);
     }
 
     #[test]
     fn test_part_2() {
-        assert_eq!(part_2(EXAMPLE), 12);
+        assert_eq!(part_2(&parse_lines(EXAMPLE)), 12);
     }
 }

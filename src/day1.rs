@@ -1,17 +1,15 @@
-fn main() {
-    let depths = read_depths();
-    println!("a: {}", a(depths.clone()));
-    println!("b: {}", b(depths));
-}
+use aoc_runner_derive::{aoc, aoc_generator};
 
-fn read_depths() -> Vec<usize> {
-    include_str!("../input.txt")
+#[aoc_generator(day1)]
+fn read_depths(input: &str) -> Vec<usize> {
+    input
         .lines()
         .map(|line| line.parse::<usize>().unwrap())
         .collect()
 }
 
-fn a(depths: Vec<usize>) -> usize {
+#[aoc(day1, part1)]
+fn a(depths: &Vec<usize>) -> usize {
     depths.iter().zip(depths.iter().skip(1)).fold(
         0,
         |acc, (prev, curr)| {
@@ -24,7 +22,8 @@ fn a(depths: Vec<usize>) -> usize {
     )
 }
 
-fn b(depths: Vec<usize>) -> usize {
+#[aoc(day1, part2)]
+fn part2(depths: &Vec<usize>) -> usize {
     let windows: Vec<usize> = depths
         .windows(3)
         .map(|window| window.iter().sum())

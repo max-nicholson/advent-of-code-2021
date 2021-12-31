@@ -1,17 +1,11 @@
+use aoc_runner_derive::{aoc, aoc_generator};
 use std::collections::HashSet;
-
-const INPUT: &str = include_str!("../input.txt");
 
 type Draw = Vec<usize>;
 
 type Board = Vec<Vec<usize>>;
 
 type Boards = Vec<Board>;
-
-fn main() {
-    println!("part_1: {}", part_1(INPUT));
-    println!("part_2: {}", part_2(INPUT));
-}
 
 fn parse_draw(input: &str) -> Draw {
     input
@@ -33,6 +27,7 @@ fn parse_board<'a>(input: impl Iterator<Item = &'a str>) -> Board {
     board
 }
 
+#[aoc_generator(day4)]
 fn parse_input(input: &str) -> (Draw, Boards) {
     let lines: Vec<&str> = input.lines().collect();
     let draw = parse_draw(lines[0]);
@@ -123,17 +118,15 @@ fn find_last_winning_board<'a>(
     panic!("No last winning board found");
 }
 
-pub fn part_1(input: &str) -> usize {
-    let (draw, boards) = parse_input(input);
-
+#[aoc(day4, part1)]
+pub fn part_1((draw, boards): &(Draw, Boards)) -> usize {
     let (winning_board, drawn, last_number_drawn) = find_first_winning_board(&draw, &boards);
 
     score(drawn, winning_board, last_number_drawn)
 }
 
-pub fn part_2(input: &str) -> usize {
-    let (draw, boards) = parse_input(input);
-
+#[aoc(day4, part2)]
+pub fn part_2((draw, boards): &(Draw, Boards)) -> usize {
     let (winning_board, drawn, last_number_drawn) = find_last_winning_board(&draw, &boards);
 
     score(drawn, winning_board, last_number_drawn)
@@ -210,11 +203,11 @@ mod tests {
 
     #[test]
     fn test_part_1() {
-        assert_eq!(part_1(EXAMPLE), 4512);
+        assert_eq!(part_1(&parse_input(EXAMPLE)), 4512);
     }
 
     #[test]
     fn test_part_2() {
-        assert_eq!(part_2(EXAMPLE), 1924);
+        assert_eq!(part_2(&parse_input(EXAMPLE)), 1924);
     }
 }

@@ -1,23 +1,62 @@
-#[macro_use]
-extern crate lazy_static;
+use aoc_runner_derive::aoc;
+use lazy_static::lazy_static;
 
 use std::collections::HashMap;
-
-use trie::WeightedTrie;
-
-mod trie;
 
 lazy_static! {
     static ref ONE: char = char::from_digit(1, 2).unwrap();
 }
 
-fn main() {
-    let report = include_str!("../input.txt");
-    println!("a: {}", a(report));
-    println!("b: {}", b(report));
+#[derive(Debug)]
+pub struct WeightedTrie {
+    pub height: usize,
+    pub tree: Vec<usize>,
 }
 
-pub fn a(input: &str) -> usize {
+impl WeightedTrie {
+    pub fn new(height: u32) -> Self {
+        if height <= 1 {
+            panic!("Must be positive height")
+        }
+
+        Self {
+            height: height as usize,
+            tree: vec![0; 2usize.pow(height + 1) - 1],
+        }
+    }
+
+    pub fn insert(&mut self, input: &str) {
+        if input.len() > self.height {
+            panic!(
+                "Trie was initialized to {} height, requires {} height",
+                self.height,
+                input.len()
+            )
+        }
+
+        self.tree[0] += 1;
+        let mut index = 0;
+        for digit in input.chars() {
+            index = match digit {
+                '0' => Self::left_from(index),
+                '1' => Self::right_from(index),
+                _ => unimplemented!("Only binary characters expected"),
+            };
+            self.tree[index] += 1;
+        }
+    }
+
+    pub fn left_from(i: usize) -> usize {
+        2 * i + 1
+    }
+
+    pub fn right_from(i: usize) -> usize {
+        2 * i + 2
+    }
+}
+
+#[aoc(day3, part1)]
+pub fn part1(input: &str) -> usize {
     let numbers: Vec<&str> = input.lines().collect();
 
     let columns = numbers.first().unwrap_or(&"").len();
@@ -54,7 +93,8 @@ pub fn a(input: &str) -> usize {
     gamma_rate * epsilon_rate
 }
 
-pub fn b(input: &str) -> usize {
+#[aoc(day3, part2)]
+pub fn part2(input: &str) -> usize {
     let numbers: Vec<&str> = input.lines().collect();
     let columns = numbers.first().unwrap_or(&"").len() as u32;
 
@@ -140,11 +180,33 @@ mod tests {
 
     #[test]
     fn test_a() {
-        assert_eq!(a(EXAMPLE), 198);
+        assert_eq!(part1(EXAMPLE), 198);
     }
 
     #[test]
     fn test_b() {
-        assert_eq!(b(EXAMPLE), 230);
+        assert_eq!(part2(EXAMPLE), 230);
+    }
+
+    #[test]
+    fn test_trie() {
+        let trie = WeightedTrie::new(2);
+        assert_eq!(trie.height, 2);
+        assert_eq!(trie.tree, vec![0; 7]);
+    }
+
+    #[test]
+    #[should_panic(expected = "Must be positive height")]
+    fn test_zero_height_trie() {
+        WeightedTrie::new(0);
+    }
+
+    #[test]
+    fn test_trie_insert() {
+        let mut trie = WeightedTrie::new(2);
+        trie.insert("10");
+        assert_eq!(trie.tree, vec![1, 0, 1, 0, 0, 1, 0]);
+        trie.insert("11");
+        assert_eq!(trie.tree, vec![2, 0, 2, 0, 0, 1, 1]);
     }
 }
