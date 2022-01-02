@@ -43,7 +43,7 @@ impl Line {
         };
 
         let mut v = [start, end];
-        v.sort();
+        v.sort_unstable();
 
         if self.is_vertical() {
             let x = self.start.0;
@@ -62,6 +62,7 @@ impl Line {
 
 type Lines = Vec<Line>;
 
+#[allow(clippy::reversed_empty_ranges)]
 fn create_range(start: usize, end: usize) -> impl Iterator<Item = usize> {
     // Can't simply use start.0..=end.0, as we may have a decreasing range
     // This turns into an empty Range (instead of a decrementing one)
@@ -74,7 +75,7 @@ fn create_range(start: usize, end: usize) -> impl Iterator<Item = usize> {
 }
 
 fn to_usize(x: &str) -> usize {
-    usize::from_str_radix(x, 10).unwrap()
+    str::parse(x).unwrap()
 }
 
 #[aoc_generator(day5)]
@@ -83,8 +84,8 @@ fn parse_lines(input: &str) -> Lines {
         .lines()
         .map(|line| {
             let points: Vec<&str> = line.split(" -> ").collect();
-            let start: Vec<usize> = points[0].split(",").map(to_usize).collect();
-            let end: Vec<usize> = points[1].split(",").map(to_usize).collect();
+            let start: Vec<usize> = points[0].split(',').map(to_usize).collect();
+            let end: Vec<usize> = points[1].split(',').map(to_usize).collect();
             Line {
                 start: (start[0], start[1]),
                 end: (end[0], end[1]),
@@ -94,7 +95,7 @@ fn parse_lines(input: &str) -> Lines {
 }
 
 #[aoc(day5, part1)]
-pub fn part_1(lines: &Lines) -> usize {
+pub fn part_1(lines: &[Line]) -> usize {
     let mut counters: HashMap<Point, usize> = HashMap::new();
 
     for line in lines.iter().filter(|l| l.is_horizontal() | l.is_vertical()) {
@@ -107,7 +108,7 @@ pub fn part_1(lines: &Lines) -> usize {
 }
 
 #[aoc(day5, part2)]
-pub fn part_2(lines: &Lines) -> usize {
+pub fn part_2(lines: &[Line]) -> usize {
     let mut counters: HashMap<Point, usize> = HashMap::new();
 
     for line in lines {

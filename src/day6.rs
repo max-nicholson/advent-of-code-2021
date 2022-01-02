@@ -7,8 +7,8 @@ fn parse_ages(input: &str) -> Vec<usize> {
         .lines()
         .next()
         .unwrap()
-        .split(",")
-        .map(|x| usize::from_str_radix(x, 10).unwrap())
+        .split(',')
+        .map(|x| str::parse(x).unwrap())
         .collect()
 }
 

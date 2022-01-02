@@ -23,7 +23,7 @@ fn find_extra_char(a: &str, b: &str) -> char {
     panic!("No extra character")
 }
 
-fn decode_segments_map<'a>(signals: &'a Signals) -> HashMap<&'a str, usize> {
+fn decode_segments_map<'a>(signals: &'a [&str]) -> HashMap<&'a str, usize> {
     // 2: 1
     // 3: 7
     // 4: 4
@@ -46,7 +46,7 @@ fn decode_segments_map<'a>(signals: &'a Signals) -> HashMap<&'a str, usize> {
             digits.insert(signal, digit);
         }
     }
-    let one: &str = digits.iter().find(|(k, &v)| v == 1usize).unwrap().0;
+    let one: &str = digits.iter().find(|(_k, &v)| v == 1usize).unwrap().0;
 
     let character_count: HashMap<char, usize> =
         signals.iter().fold(HashMap::new(), |mut map, signal| {
@@ -124,13 +124,11 @@ fn decode_unique_digits(signal: &str) -> Option<usize> {
         3 => Some(7),
         4 => Some(4),
         7 => Some(8),
-        // TODO: other segments
         _ => None,
     }
 }
 
-// NB: Can't use aoc(generator) as it will complain about lifetimes
-fn parse_input<'a>(input: &'a str) -> Vec<Entry<'a>> {
+fn parse_input(input: &str) -> Vec<Entry> {
     input
         .lines()
         .map(|l| {

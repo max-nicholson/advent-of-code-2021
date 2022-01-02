@@ -9,7 +9,7 @@ fn read_depths(input: &str) -> Vec<usize> {
 }
 
 #[aoc(day1, part1)]
-fn a(depths: &Vec<usize>) -> usize {
+fn a(depths: &[usize]) -> usize {
     depths.iter().zip(depths.iter().skip(1)).fold(
         0,
         |acc, (prev, curr)| {
@@ -23,7 +23,7 @@ fn a(depths: &Vec<usize>) -> usize {
 }
 
 #[aoc(day1, part2)]
-fn part2(depths: &Vec<usize>) -> usize {
+fn part2(depths: &[usize]) -> usize {
     let windows: Vec<usize> = depths
         .windows(3)
         .map(|window| window.iter().sum())

@@ -9,7 +9,7 @@ type Boards = Vec<Board>;
 
 fn parse_draw(input: &str) -> Draw {
     input
-        .split(",")
+        .split(',')
         .map(|n| str::parse::<usize>(n).unwrap())
         .collect()
 }
@@ -41,7 +41,7 @@ fn parse_input(input: &str) -> (Draw, Boards) {
     (draw, boards)
 }
 
-fn score(draw: HashSet<usize>, board: &Board, last_number: usize) -> usize {
+fn score(draw: HashSet<usize>, board: &[Vec<usize>], last_number: usize) -> usize {
     let mut sum = 0;
     for row in board {
         for number in row {
@@ -54,7 +54,7 @@ fn score(draw: HashSet<usize>, board: &Board, last_number: usize) -> usize {
     sum * last_number
 }
 
-fn has_won(board: &Board, drawn: &HashSet<usize>) -> bool {
+fn has_won(board: &[Vec<usize>], drawn: &HashSet<usize>) -> bool {
     // check rows
     for row in board {
         if row.iter().all(|c| drawn.contains(c)) {
@@ -74,17 +74,17 @@ fn has_won(board: &Board, drawn: &HashSet<usize>) -> bool {
 }
 
 fn find_first_winning_board<'a>(
-    draw: &Draw,
-    boards: &'a Boards,
+    draw: &[usize],
+    boards: &'a [Board],
 ) -> (&'a Board, HashSet<usize>, usize) {
     // Skip first 4 draws as we can't possibly have a win until draw 5
-    let mut drawn = HashSet::<usize>::from_iter(draw.into_iter().take(4).cloned());
+    let mut drawn = HashSet::<usize>::from_iter(draw.iter().take(4).cloned());
 
     for number in draw.iter().skip(4) {
         drawn.insert(*number);
         for board in boards {
             if has_won(board, &drawn) {
-                return (board, drawn, number.clone());
+                return (board, drawn, *number);
             }
         }
     }
@@ -92,11 +92,11 @@ fn find_first_winning_board<'a>(
 }
 
 fn find_last_winning_board<'a>(
-    draw: &Draw,
-    boards: &'a Boards,
+    draw: &[usize],
+    boards: &'a [Board],
 ) -> (&'a Board, HashSet<usize>, usize) {
     // Skip first 4 draws as we can't possibly have a win until draw 5
-    let mut drawn = HashSet::<usize>::from_iter(draw.into_iter().take(4).cloned());
+    let mut drawn = HashSet::<usize>::from_iter(draw.iter().take(4).cloned());
     let mut won_boards: HashSet<usize> = HashSet::new();
 
     for number in draw.iter().skip(4) {
@@ -109,7 +109,7 @@ fn find_last_winning_board<'a>(
             if has_won(board, &drawn) {
                 if won_boards.len() == boards.len() - 1 {
                     // This is the last board
-                    return (board, drawn, number.clone());
+                    return (board, drawn, *number);
                 }
                 won_boards.insert(board_number);
             }
@@ -120,14 +120,14 @@ fn find_last_winning_board<'a>(
 
 #[aoc(day4, part1)]
 pub fn part_1((draw, boards): &(Draw, Boards)) -> usize {
-    let (winning_board, drawn, last_number_drawn) = find_first_winning_board(&draw, &boards);
+    let (winning_board, drawn, last_number_drawn) = find_first_winning_board(draw, boards);
 
     score(drawn, winning_board, last_number_drawn)
 }
 
 #[aoc(day4, part2)]
 pub fn part_2((draw, boards): &(Draw, Boards)) -> usize {
-    let (winning_board, drawn, last_number_drawn) = find_last_winning_board(&draw, &boards);
+    let (winning_board, drawn, last_number_drawn) = find_last_winning_board(draw, boards);
 
     score(drawn, winning_board, last_number_drawn)
 }
@@ -188,7 +188,7 @@ mod tests {
         assert_eq!(
             score(
                 HashSet::<usize>::from_iter(draw),
-                &vec![
+                &[
                     vec![14, 21, 17, 24, 4],
                     vec![10, 16, 15, 9, 19],
                     vec![18, 8, 23, 26, 20],
