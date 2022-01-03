@@ -38,6 +38,10 @@ pub fn part_2(positions: &[usize]) -> usize {
 
     let mut least_fuel: usize = usize::MAX;
 
+    // NB: If additional performance is needed, can either:
+    // 1. Start at the median/mean, and explore either side. Continue on the side where we see a decrease
+    // 2. Use binary search
+
     for position in min..=max {
         let fuel: usize = counters
             .iter()
@@ -52,6 +56,9 @@ pub fn part_2(positions: &[usize]) -> usize {
 
         if fuel < least_fuel {
             least_fuel = fuel
+        } else {
+            // If we aren't decreasing, we've reached the trough and there's no point continuing
+            break;
         }
     }
 
