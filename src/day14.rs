@@ -4,42 +4,59 @@ use std::str;
 
 use aoc_runner_derive::aoc;
 
-pub fn parse_input(input: &str) -> (Vec<char>, HashMap<&str, char>) {
+pub fn parse_input(input: &str) -> (Vec<char>, HashMap<(char, char), char>) {
     let mut lines = input.lines();
 
     let template = lines.next().expect("Polymer template").chars().collect();
 
     lines.next();
 
-    let rules: HashMap<&str, char> = lines
+    let rules: HashMap<(char, char), char> = lines
         .map(|l| {
             let (pair, element) = l.split_once(" -> ").unwrap();
-            (pair, element.chars().next().unwrap())
+            let mut pair = pair.chars();
+            (
+                (pair.next().unwrap(), pair.next().unwrap()),
+                element.chars().next().unwrap(),
+            )
         })
         .collect();
 
     (template, rules)
 }
 
-fn step(polymer: &[char], rules: &HashMap<&str, char>) -> Vec<char> {
-    let mut new_polymer = polymer.to_vec();
-    let mut offset = 1;
-    for i in 0..polymer.len() - 1 {
-        let pair = [polymer[i] as u8, polymer[i + 1] as u8];
-        let pair = str::from_utf8(&pair).expect("utf-8 characters");
-        if let Some(&element) = rules.get(pair) {
-            new_polymer.insert(i + offset, element);
-            offset += 1;
+fn step(
+    current_pairs: HashMap<(char, char), usize>,
+    rules: &HashMap<(char, char), char>,
+) -> HashMap<(char, char), usize> {
+    let mut pairs = HashMap::new();
+
+    current_pairs.into_iter().for_each(|(pair, count)| {
+        let (a, b) = pair;
+        match rules.get(&pair) {
+            Some(&element) => {
+                *pairs.entry((a, element)).or_insert(0) += count;
+                *pairs.entry((element, b)).or_insert(0) += count;
+            }
+            None => unimplemented!(),
         }
-    }
-    new_polymer
+    });
+
+    pairs
 }
 
-fn evaluate(polymer: Vec<char>) -> u32 {
-    let mut counters: HashMap<char, u32> = HashMap::new();
-    polymer
-        .into_iter()
-        .for_each(|c| *counters.entry(c).or_insert(0) += 1);
+fn evaluate(pairs: HashMap<(char, char), usize>, last_element: char) -> u128 {
+    let mut counters: HashMap<char, u128> = HashMap::new();
+
+    // If we only use the first item in the pair for each pair, we avoid double counting
+    // However, we will need to increment the last element in the (original) template,
+    // because we will undercount by 1 (as it won't be the "first" element in any pair)
+
+    pairs
+        .iter()
+        .for_each(|((a, _b), &count)| *counters.entry(*a).or_insert(0) += count as u128);
+
+    *counters.entry(last_element).or_insert(0) += 1;
 
     match counters.values().minmax() {
         MinMaxResult::MinMax(&min, &max) => max - min,
@@ -47,18 +64,36 @@ fn evaluate(polymer: Vec<char>) -> u32 {
     }
 }
 
+fn load_initial_pairs(template: Vec<char>) -> HashMap<(char, char), usize> {
+    let mut current_pairs: HashMap<(char, char), usize> = HashMap::new();
+
+    template.into_iter().tuple_windows().for_each(|(a, b)| {
+        *current_pairs.entry((a, b)).or_insert(0) += 1;
+    });
+
+    current_pairs
+}
+
 #[aoc(day14, part1)]
-pub fn part_1(input: &str) -> u32 {
+pub fn part_1(input: &str) -> u128 {
     let (template, rules) = parse_input(input);
 
-    let polymer = (0..10).fold(template, |polymer, _| step(&polymer, &rules));
+    let last_element = template[template.len() - 1];
 
-    evaluate(polymer)
+    let final_pairs = (0..10).fold(load_initial_pairs(template), |acc, _step| step(acc, &rules));
+
+    evaluate(final_pairs, last_element)
 }
 
 #[aoc(day14, part2)]
-pub fn part_2(input: &str) -> u32 {
-    todo!();
+pub fn part_2(input: &str) -> u128 {
+    let (template, rules) = parse_input(input);
+
+    let last_element = template[template.len() - 1];
+
+    let final_pairs = (0..40).fold(load_initial_pairs(template), |acc, _step| step(acc, &rules));
+
+    evaluate(final_pairs, last_element)
 }
 
 #[cfg(test)]
@@ -91,7 +126,6 @@ CN -> C";
 
     #[test]
     fn test_part_2() {
-        todo!();
         assert_eq!(part_2(EXAMPLE), 2188189693529);
     }
 }
